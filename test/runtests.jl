@@ -62,6 +62,7 @@ else
     include("./runtests_slayer_runner.jl")
     include("./runtests_kinetic.jl")
     include("./runtests_kinetic_validity.jl")
+    include("./runtests_cgl_gauge.jl")
     include("./runtests_multiion.jl")
     include("./runtests_fullruns.jl")
     include("./runtests_coils.jl")
