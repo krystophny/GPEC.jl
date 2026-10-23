@@ -1,13 +1,10 @@
 name: Build and Test Julia Package
 
 on:
-  # Every pull request, whatever its base, so a PR stacked on another feature branch
-  # is tested too; it is tested again once retargeted, when it syncs with develop.
   pull_request:
-  push:
-    branches:
-      - main
-      - develop
+  workflow_dispatch:
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -20,6 +17,7 @@ concurrency:
 
 jobs:
   changes:
+    if: github.event_name != 'pull_request'
     name: Detect Julia changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -87,7 +85,7 @@ jobs:
   test:
     name: runtests ${{ matrix.version }} - ${{ matrix.os }}
     needs: changes
-    if: needs.changes.outputs.julia == 'true'
+    if: github.event_name != 'pull_request' && needs.changes.outputs.julia == 'true'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     strategy:
@@ -188,12 +186,11 @@ jobs:
           path: ${{ env.DEPOT_PATHS }}
           key: julia-depot-${{ matrix.os }}-${{ matrix.version }}-${{ steps.julia.outputs.julia-version }}-${{ hashFiles('Project.toml', 'ci/manifests/Manifest-v*.toml') }}
 
-  # Stable check that is present on every pull request, whether or not the suite
-  # ran. Point branch protection at this job so skipped runs do not block merges.
+  # Stable merge-group check. Pull requests skip the native jobs until queued.
   test-status:
     name: Tests
     needs: [changes, test]
-    if: always()
+    if: always() && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
