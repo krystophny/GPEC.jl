@@ -3,8 +3,6 @@ name: Build and Test Julia Package
 on:
   pull_request:
   workflow_dispatch:
-  merge_group:
-    types: [checks_requested]
 
 permissions:
   contents: read
@@ -186,7 +184,7 @@ jobs:
           path: ${{ env.DEPOT_PATHS }}
           key: julia-depot-${{ matrix.os }}-${{ matrix.version }}-${{ steps.julia.outputs.julia-version }}-${{ hashFiles('Project.toml', 'ci/manifests/Manifest-v*.toml') }}
 
-  # Stable merge-group check. Pull requests skip the native jobs until queued.
+  # Stable manual qualification check. Pull requests skip the native jobs.
   test-status:
     name: Tests
     needs: [changes, test]
